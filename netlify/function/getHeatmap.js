@@ -68,7 +68,7 @@ async function queryAll(database_id, filter) {
 
 exports.handler = async(event) => {
     try {
-        const database_id = process.env.NOTION_DATABASE_ID;
+        const database_id = process.env.NOTION_DB_ID;
         if (!database_id) {
             return {
                 statusCode: 500,
