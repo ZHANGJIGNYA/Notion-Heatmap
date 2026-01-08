@@ -1,7 +1,7 @@
 // netlify/functions/getHeatmap.js
 
 // ==========================================
-// 1. 辅助工具函数 (Helper Functions)
+// 1. 辅助工具函数
 // ==========================================
 
 function pad(n) {
@@ -24,28 +24,38 @@ function addDays(d, n) {
     return x;
 }
 
-function levelByCount(count, t1 = 10, t2 = 20) {
+function levelByCount(count, t1 = 5, t2 = 10) {
     if (!count || count <= 0) return 0;
     if (count < t1) return 1;
     if (count <= t2) return 2;
     return 3;
 }
 
-function getProp(page, propName) {
-    if (!page || !page.properties) return null;
-    return page.properties[propName] || null;
-}
-
+// 🔥 核心修复：智能日期读取函数 (已验证) 🔥
 function getDateProp(page, propName) {
-    const p = getProp(page, propName);
+    if (!page || !page.properties) return null;
+    const p = page.properties[propName];
     if (!p) return null;
+
+    // 情况 A: 手动选择的 Date (📅)
     if (p.type === "date" && p.date && p.date.start) {
         return String(p.date.start).slice(0, 10);
     }
+
+    // 情况 B: 自动生成的 Created Time (🕒) - ✅ 这里修复了你的问题
+    if (p.type === "created_time" && p.created_time) {
+        return String(p.created_time).slice(0, 10);
+    }
+
+    // 情况 C: 自动生成的 Last Edited Time
+    if (p.type === "last_edited_time" && p.last_edited_time) {
+        return String(p.last_edited_time).slice(0, 10);
+    }
+
     return null;
 }
 
-// Notion API 查询函数（带分页处理）
+// Notion API 查询
 async function queryAll(databaseId, notionToken, filter) {
     let results = [];
     let cursor = undefined;
@@ -79,42 +89,19 @@ async function queryAll(databaseId, notionToken, filter) {
 }
 
 // ==========================================
-// 2. 主处理逻辑 (Main Handler)
+// 2. 主处理逻辑
 // ==========================================
 
 exports.handler = async(event) => {
     try {
         const databaseId = process.env.NOTION_DB_ID;
-        const notionToken = process.env.NOTION_TOKEN;
+        // 加上 .trim() 防止 Token 带空格
+        const notionToken = process.env.NOTION_TOKEN ? process.env.NOTION_TOKEN.trim() : "";
 
-        // --- 🔍 调试代码开始 (部署后去 Log 查看) ---
-        console.log("=== Environment Debug ===");
-        console.log("DB ID exists?", !!databaseId);
-        console.log("Token exists?", !!notionToken);
-
-        if (notionToken) {
-            // 打印前10位，检查是否包含多余的引号或空格
-            // 正常应该是: [secret_ABC...]
-            // 错误示范: ["secret_...] (带了引号)
-            const cleanToken = notionToken.trim();
-            console.log("Token check:", `[${cleanToken.substring(0, 10)}...]`, "Length:", cleanToken.length);
-
-            // 额外检查：如果长度包含不正常的引号
-            if (notionToken.includes('"') || notionToken.includes("'")) {
-                console.warn("⚠️ 警告: Token 中似乎包含了引号，请去 Netlify 环境变量去掉引号！");
-            }
-        }
-        // --- 🔍 调试代码结束 ---
-
-        // 1. 基础检查
-        if (!databaseId) {
-            return { statusCode: 500, body: JSON.stringify({ error: "Missing NOTION_DB_ID" }) };
-        }
-        if (!notionToken) {
-            return { statusCode: 500, body: JSON.stringify({ error: "Missing NOTION_TOKEN" }) };
+        if (!databaseId || !notionToken) {
+            return { statusCode: 500, body: JSON.stringify({ error: "Missing Env Vars" }) };
         }
 
-        // 2. 计算日期范围
         const days = Math.min(
             400,
             Math.max(
@@ -131,23 +118,19 @@ exports.handler = async(event) => {
         const today = startOfDay(new Date());
         const from = startOfDay(addDays(today, -(days - 1)));
         const fromISO = toISODate(from);
-        const toISO = toISODate(addDays(today, 1)); // exclusive
+        const toISO = toISODate(addDays(today, 1));
 
-        // 3. 定义 Notion 中的字段名 (请确保和 Notion 数据库一致)
+        // ⚠️ 你的列名是 "Added Date"
         const PROP_ADDED = "Added Date";
         const PROP_REVIEWED = "Last Reviewed";
         const PROP_QUIZ = "Last Quiz";
 
-        // 4. 从 Notion 获取数据
-        // 目前只筛选 Added Date 范围内的数据，如果 Review/Quiz 日期和 Added 日期跨度很大，可能需要放宽筛选条件
-        // 但为了性能，暂时先这样写
         const pages = await queryAll(databaseId, notionToken, {
             property: PROP_ADDED,
             date: { on_or_after: fromISO, before: toISO },
         });
 
-        // 5. 统计数据
-        const counts = new Map(); // date -> { newCount, reviewCount, quizCount }
+        const counts = new Map();
 
         function bump(date, key) {
             if (!date) return;
@@ -161,34 +144,29 @@ exports.handler = async(event) => {
             bump(getDateProp(page, PROP_QUIZ), "quizCount");
         }
 
-        // 6. 生成最终数组
         const out = [];
         for (let i = 0; i < days; i++) {
             const d = toISODate(addDays(from, i));
             const c = counts.get(d) || { newCount: 0, reviewCount: 0, quizCount: 0 };
             out.push({
                 date: d,
-                add: levelByCount(c.newCount, 10, 20),
-                review: levelByCount(c.reviewCount, 10, 20),
-                quiz: levelByCount(c.quizCount, 10, 20),
+                add: levelByCount(c.newCount),
+                review: levelByCount(c.reviewCount),
+                quiz: levelByCount(c.quizCount),
             });
         }
 
-        // 7. 成功返回 (Status 200)
         return {
             statusCode: 200,
             headers: {
                 "Content-Type": "application/json",
-                "Cache-Control": "no-store",
-                // 如果涉及跨域，可能需要加 Access-Control-Allow-Origin
-                // "Access-Control-Allow-Origin": "*" 
+                "Cache-Control": "no-store"
             },
             body: JSON.stringify(out),
         };
 
     } catch (err) {
-        // 8. 错误捕获 (Status 500)
-        console.error("❌ Function Crashed:", err);
+        console.error("Function Error:", err);
         return {
             statusCode: 500,
             body: JSON.stringify({
