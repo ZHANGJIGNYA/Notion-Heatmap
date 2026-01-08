@@ -316,7 +316,7 @@
 
         async function boot() {
             // 1) 先拿数据
-            const res = await fetch(`/.netlify/functions/getHeatmap?days=${DAYS}`);
+            const res = await fetch(`/.netlify/function/getHeatmap?days=${DAYS}`);
             if (!res.ok) {
                 const t = await res.text();
                 console.log("getHeatmap failed:", res.status, t);
