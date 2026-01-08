@@ -31,6 +31,11 @@ function levelByCount(count, t1 = 10, t2 = 20) {
     return 3;
 }
 
+function getProp(page, propName) {
+    if (!page || !page.properties) return null;
+    return page.properties[propName] || null;
+}
+
 function getDateProp(page, propName) {
     const p = getProp(page, propName);
     if (!p) return null;
