@@ -315,37 +315,7 @@
         // 你后面接 Make / Google Sheets 时，最终只要产出这种结构即可：
         // date: YYYY-MM-DD
         // add/review/quiz: 0-4（或你自己定义的强度）
-        const data = [{
-            date: "2026-01-01",
-            add: 2,
-            review: 0,
-            quiz: 0
-        }, {
-            date: "2026-01-02",
-            add: 1,
-            review: 1,
-            quiz: 0
-        }, {
-            date: "2026-01-03",
-            add: 0,
-            review: 3,
-            quiz: 1
-        }, {
-            date: "2026-01-04",
-            add: 4,
-            review: 2,
-            quiz: 2
-        }, {
-            date: "2026-01-05",
-            add: 0,
-            review: 0,
-            quiz: 0
-        }, {
-            date: "2026-01-06",
-            add: 1,
-            review: 4,
-            quiz: 3
-        }, ];
+
 
         // ========== 工具函数 ==========
         const pad = n => String(n).padStart(2, "0");
@@ -542,6 +512,22 @@
             div.textContent = t;
             monthsTopEl.appendChild(div);
         });
+
+        async function addWord(word) {
+            await fetch("/.netlify/functions/addWord", {
+                method: "POST",
+                body: JSON.stringify({
+                    word
+                })
+            });
+        }
+
+
+        async function loadToday() {
+            const res = await fetch("/.netlify/functions/getTodayWords");
+            const words = await res.json();
+            console.log(words);
+        }
     </script>
 </body>
 
