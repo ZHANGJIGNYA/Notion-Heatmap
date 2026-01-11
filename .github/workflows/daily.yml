@@ -26,6 +26,11 @@ jobs:
         run: |
           git config user.name "heatmap-bot"
           git config user.email "heatmap-bot@users.noreply.github.com"
+
           git add docs/data.json
           git commit -m "update heatmap data" || echo "no changes"
-          git push
+
+          # ✅ 关键：先把远端最新提交拉下来再推
+          git pull --rebase origin main
+
+          git push origin main
