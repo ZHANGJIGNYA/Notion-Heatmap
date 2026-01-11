@@ -1,8 +1,8 @@
-name: Daily Heatmap Data
+name: Build Vocab Heatmap Data
 
 on:
   schedule:
-    - cron: "15 0 * * *"  # UTC 00:15 = MYT 08:15
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,8 +24,8 @@ jobs:
         run: python scripts/build_data.py
       - name: Commit & push
         run: |
-          git config user.name "ZHANGJIGNYA"
-          git config user.email "zjy0824113@gmail.com"
-          git add public/data.json
-          git commit -m "update data.json" || echo "no changes"
+          git config user.name "heatmap-bot"
+          git config user.email "heatmap-bot@users.noreply.github.com"
+          git add docs/data.json
+          git commit -m "update heatmap data" || echo "no changes"
           git push

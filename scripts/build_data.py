@@ -10,71 +10,65 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-# === 你的 Notion 字段名（来自截图）===
-ADDED_DATE_PROP = "Added Date"
-LAST_REVIEWED_PROP = "Last Reviewed"
-LAST_QUIZ_PROP = "Last Quiz"
-REVIEW_STAGE_PROP = "Review Stage"  # 可选
-# =====================================
+# === Notion 字段名（按你的数据库）===
+ADDED_DATE = "Added Date"
+LAST_REVIEWED = "Last Reviewed"
+LAST_QUIZ = "Last Quiz"
+# ===================================
 
-def query_all():
+def fetch_all_pages():
     url = f"https://api.notion.com/v1/databases/{DB_ID}/query"
     payload = {"page_size": 100}
-    out = []
+    pages = []
+
     while True:
-        r = requests.post(url, headers=HEADERS, json=payload, timeout=60)
+        r = requests.post(url, headers=HEADERS, json=payload)
         r.raise_for_status()
         data = r.json()
-        out.extend(data["results"])
+        pages.extend(data["results"])
         if not data.get("has_more"):
             break
         payload["start_cursor"] = data["next_cursor"]
-    return out
+
+    return pages
 
 def get_date(props, name):
     d = props.get(name, {}).get("date")
-    if not d or not d.get("start"):
-        return None
-    return d["start"][:10]
-
-def get_number(props, name):
-    return int((props.get(name, {}) or {}).get("number") or 0)
+    if d and d.get("start"):
+        return d["start"][:10]
+    return None
 
 def main():
-    pages = query_all()
-    agg = {}
+    pages = fetch_all_pages()
+    daily = {}
 
     def ensure(day):
-        if day not in agg:
-            agg[day] = {"date": day, "add": 0, "review": 0, "quiz": 0}
+        if day not in daily:
+            daily[day] = {"date": day, "add": 0, "review": 0, "quiz": 0}
 
     for p in pages:
-        props = p.get("properties", {})
+        props = p["properties"]
 
-        # New
-        d_add = get_date(props, ADDED_DATE_PROP)
+        d_add = get_date(props, ADDED_DATE)
         if d_add:
             ensure(d_add)
-            agg[d_add]["add"] += 1
+            daily[d_add]["add"] += 1
 
-        # Review
-        d_rev = get_date(props, LAST_REVIEWED_PROP)
-        stage = get_number(props, REVIEW_STAGE_PROP)
-        if d_rev and stage >= 1:
+        d_rev = get_date(props, LAST_REVIEWED)
+        if d_rev:
             ensure(d_rev)
-            agg[d_rev]["review"] += 1
+            daily[d_rev]["review"] += 1
 
-        # Quiz
-        d_quiz = get_date(props, LAST_QUIZ_PROP)
+        d_quiz = get_date(props, LAST_QUIZ)
         if d_quiz:
             ensure(d_quiz)
-            agg[d_quiz]["quiz"] += 1
+            daily[d_quiz]["quiz"] += 1
 
-    arr = sorted(agg.values(), key=lambda x: x["date"])
+    out = sorted(daily.values(), key=lambda x: x["date"])
 
-    os.makedirs("public", exist_ok=True)
-    with open("public/data.json", "w", encoding="utf-8") as f:
-        json.dump(arr, f, ensure_ascii=False, indent=2)
+    os.makedirs("docs", exist_ok=True)
+    with open("docs/data.json", "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
     main()
