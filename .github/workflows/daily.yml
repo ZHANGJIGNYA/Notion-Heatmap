@@ -29,8 +29,7 @@ jobs:
 
           git add docs/data.json
           git commit -m "update heatmap data" || echo "no changes"
-
-          # ✅ 关键：先把远端最新提交拉下来再推
+          
           git pull --rebase origin main
 
           git push origin main
