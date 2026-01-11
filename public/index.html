@@ -316,14 +316,22 @@
 
         async function boot() {
             // 1) 先拿数据
-            const res = await fetch(`/.netlify/functions/getHeatmap?days=${DAYS}`);
+            // const res = await fetch(`/.netlify/functions/getHeatmap?days=${DAYS}`);
+            const res = await fetch(`./data.json?ts=${Date.now()}`);
+            // if (!res.ok) {
+            //     const t = await res.text();
+            //     console.log("getHeatmap failed:", res.status, t);
+            //     return;
+            // }
+            // const data = await res.json();
+
             if (!res.ok) {
                 const t = await res.text();
-                console.log("getHeatmap failed:", res.status, t);
+                console.log("data.json fetch failed:", res.status, t);
                 return;
             }
             const data = await res.json();
-
+            
             // 2) 再开始你原本的渲染逻辑
             const pad = n => String(n).padStart(2, "0");
             const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
