@@ -7,28 +7,56 @@
     <title>Vocab Heatmap</title>
     <style>
          :root {
-            --zero: rgba(255, 255, 255, 0.06);
             --cell: 14px;
             --gap: 4px;
             --radius: 3px;
-            --bg: #0f0f12;
-            --text: #eaeaf0;
-            --muted: #a7a7b3;
-            /* add */
-            --add0: var(--zero);
-            --add1: #7a4b1f;
-            --add2: #ff9f43;
-            --add3: #ff7a00;
-            /* rev */
-            --rev0: var(--zero);
-            --rev1: #2f6b45;
-            --rev2: #5dd39e;
-            --rev3: #1f9d63;
-            /* quiz */
-            --quiz0: var(--zero);
-            --quiz1: #2b4f73;
-            --quiz2: #5aa9e6;
-            --quiz3: #1d7dd6;
+
+            /* Notion-ish light */
+            --bg: #ffffff;
+            --text: rgba(55,53,47,0.9);
+            --muted: rgba(55,53,47,0.6);
+            --border: rgba(55,53,47,0.12);
+            --zero: rgba(55,53,47,0.06);
+
+            /* Notion-ish heat colors (low saturation) */
+            /* add = amber */
+            --add1: rgba(255, 200, 120, 0.55);
+            --add2: rgba(255, 180,  90, 0.75);
+            --add3: rgba(255, 160,  60, 0.95);
+
+            /* rev = green */
+            --rev1: rgba(150, 220, 180, 0.55);
+            --rev2: rgba(110, 205, 160, 0.75);
+            --rev3: rgba( 70, 190, 140, 0.95);
+
+            /* quiz = blue */
+            --quiz1: rgba(150, 200, 245, 0.55);
+            --quiz2: rgba(110, 175, 235, 0.75);
+            --quiz3: rgba( 80, 150, 225, 0.95);
+            }
+
+        /* Auto dark mode */
+        @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #0f1115;
+            --text: rgba(255,255,255,0.92);
+            --muted: rgba(255,255,255,0.62);
+            --border: rgba(255,255,255,0.14);
+            --zero: rgba(255,255,255,0.07);
+
+            /* Dark mode colors: still Notion-ish, less neon */
+            --add1: rgba(255, 180,  90, 0.35);
+            --add2: rgba(255, 160,  60, 0.55);
+            --add3: rgba(255, 140,  40, 0.78);
+
+            --rev1: rgba(110, 205, 160, 0.30);
+            --rev2: rgba( 80, 190, 145, 0.50);
+            --rev3: rgba( 55, 175, 130, 0.75);
+
+            --quiz1: rgba(110, 175, 235, 0.30);
+            --quiz2: rgba( 85, 155, 225, 0.50);
+            --quiz3: rgba( 65, 135, 215, 0.75);
+        }
         }
         
         body {
@@ -108,7 +136,7 @@
             top: 0;
             width: 1px;
             height: 100%;
-            background: rgba(255, 255, 255, 0.10);
+            background: var(--border);        
         }
         
         .cell {
@@ -117,7 +145,7 @@
             border-radius: var(--radius);
             display: flex;
             overflow: hidden;
-            outline: 1px solid rgba(255, 255, 255, 0.06);
+            outline: 1px solid var(--border);
         }
         
         .seg {
@@ -205,16 +233,20 @@
             align-items: center;
             padding: 4px 8px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(55,53,47,0.06);
             color: var(--text);
             font-size: 12px;
         }
         
+        @media (prefers-color-scheme: dark) {
+            .pill { background: rgba(255,255,255,0.08); }
+        }
+
         .tooltip {
             position: fixed;
             pointer-events: none;
-            background: rgba(20, 20, 26, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255,255,255,0.96);
+            border: 1px solid var(--border);
             color: var(--text);
             padding: 8px 10px;
             border-radius: 8px;
@@ -226,6 +258,10 @@
             z-index: 9999;
         }
         
+        @media (prefers-color-scheme: dark) {
+            .tooltip { background: rgba(20,20,26,0.92); }
+        }
+
         .tooltip small {
             color: var(--muted);
             display: block;
@@ -263,6 +299,21 @@
             justify-content: flex-start;
             white-space: nowrap;
         }
+
+        body.embed {
+            background: transparent;
+        }
+
+        body.embed .wrap {
+            padding: 10px 10px 12px;
+            max-width: 100%;
+        }
+
+        body.embed .title,
+        body.embed .legend {
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -312,6 +363,8 @@
     <div class="tooltip" id="tip"></div>
 
     <script>
+        const params = new URLSearchParams(location.search);
+        if (params.get("embed") === "1") document.body.classList.add("embed");
         const DAYS = 180;
 
         async function boot() {
