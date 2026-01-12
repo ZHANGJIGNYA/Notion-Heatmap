@@ -268,11 +268,11 @@
             margin-top: 2px;
         }
         
-        .grid-wrap {
-            display: inline-block;
-            overflow-x: auto;
-            /* ✅ 统一在外层滚动 */
-            padding-bottom: 6px;
+        .grid-wrap{
+            display:inline-block;
+            overflow-x:auto;
+            padding: 6px 8px 6px 12px; /* 左边多给一点 */
+            box-sizing: border-box;
         }
         
         .months-top {
@@ -285,7 +285,7 @@
             position: sticky;
             /* 可选：滚动时保持在上方 */
             top: 0;
-            background: var(--bg);
+            background: transparent;
             /* 避免遮挡时透底 */
             z-index: 5;
         }
@@ -305,7 +305,7 @@
         }
 
         body.embed .wrap {
-            padding: 10px 10px 12px;
+            padding: 10px 10px 12px 14px;
             max-width: 100%;
         }
 
