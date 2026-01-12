@@ -314,6 +314,83 @@
             display: none;
         }
 
+
+        /* ===== Notion-ish card grid ===== */
+        .cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(320px, 1fr));
+        gap: 14px;
+        margin-top: 10px;
+        }
+
+        @media (max-width: 860px) {
+        .cards { grid-template-columns: 1fr; }
+        }
+
+        .card {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: rgba(55,53,47,0.03);
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        @media (prefers-color-scheme: dark) {
+        .card {
+            background: rgba(255,255,255,0.04);
+            box-shadow: 0 8px 26px rgba(0,0,0,0.35);
+        }
+        }
+
+        .card-hd {
+        padding: 12px 14px 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        }
+
+        .card-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text);
+        }
+
+        .card-sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+        }
+
+        .badge {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.45);
+        user-select: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+        .badge { background: rgba(0,0,0,0.25); }
+        }
+
+        .card-bd {
+        padding: 0 14px 14px;
+        }
+
+        /* 卡片里让 heatmap 不贴边 & 不被裁切 */
+        .card .grid-wrap {
+        padding: 8px 10px 10px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.35);
+        }
+
+        @media (prefers-color-scheme: dark) {
+        .card .grid-wrap { background: rgba(0,0,0,0.18); }
+        }
     </style>
 </head>
 
@@ -324,12 +401,26 @@
             <div class="hint">每格 3 段：add / review / quiz</div>
         </div>
 
-        <div class="heatmap">
-            <div class="months" id="months"></div>
-            <div class="grid-wrap" id="gridWrap">
-                <div class="months-top" id="monthsTop"></div>
-                <div class="grid" id="grid"></div>
-            </div>
+        <div class="cards">
+            <section class="card">
+                <div class="card-hd">
+                <div>
+                    <h2 class="card-title" id="cardTitle">Vocabulary Heatmap</h2>
+                    <div class="card-sub" id="cardSub">每格 3 段：add / review / quiz</div>
+                </div>
+                <div class="badge" id="cardBadge">Last 180 days</div>
+                </div>
+
+                <div class="card-bd">
+                <div class="heatmap">
+                    <div class="months" id="months"></div>
+                    <div class="grid-wrap" id="gridWrap">
+                    <div class="months-top" id="monthsTop"></div>
+                    <div class="grid" id="grid"></div>
+                    </div>
+                </div>
+                </div>
+            </section>
         </div>
 
         <div class="legend">
