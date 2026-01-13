@@ -112,4 +112,9 @@ This heatmap is part of a larger personal learning system and is intentionally s
 
 ---
 
+<p align="center">
+  <a href="https://ko-fi.com/jingyazhang" target="_blank">
+    <img src="https://storage.ko-fi.com/cdn/kofi_button_red.png" width="200" />
+  </a>
+</p>
 
