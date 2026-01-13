@@ -2,8 +2,12 @@
 [English](README.md) | [中文说明](README.zh-CN.md)
 
 A visual dashboard for tracking daily vocabulary learning activity, inspired by GitHub-style contribution heatmaps.
-[![Vocabulary Heatmap Preview](./heatmap.jpg.png)](https://zhangjingya.github.io/notion-heatmap/)
 
+## 🎨 Preview
+
+| Light mode | Dark mode |
+|-----------|-----------|
+| [![Light](./assets/heatmap_light.png)](https://zhangjingya.github.io/notion-heatmap/) | [![Dark](./assets/heatmap_dark.png)](https://zhangjingya.github.io/notion-heatmap/) |
 
 This heatmap is designed to work with **Notion-based vocabulary systems** and provides a quick overview of learning consistency over time.
 
