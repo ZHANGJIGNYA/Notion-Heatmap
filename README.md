@@ -33,9 +33,9 @@ Each cell represents **one day** of learning activity.
 
 Each cell is divided into **three segments**:
 
-- **Top**: New words added
+- **Left**: New words added
 - **Middle**: Words reviewed
-- **Bottom**: Quiz attempts
+- **Right**: Quiz attempts
 
 > 3 segments per cell: Add · Review · Quiz
 
