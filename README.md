@@ -2,6 +2,8 @@
 [English](README.md) | [中文说明](README.zh-CN.md)
 
 A visual dashboard for tracking daily vocabulary learning activity, inspired by GitHub-style contribution heatmaps.
+This heatmap is designed to work with **Notion-based vocabulary systems** and provides a quick overview of learning consistency over time.
+
 
 ## 🎨 Preview
 
@@ -9,8 +11,20 @@ A visual dashboard for tracking daily vocabulary learning activity, inspired by 
 |-----------|-----------|
 | [![Light](./assets/heatmap_light.png)](https://zhangjingya.github.io/notion-heatmap/) | [![Dark](./assets/heatmap_dark.png)](https://zhangjingya.github.io/notion-heatmap/) |
 
-This heatmap is designed to work with **Notion-based vocabulary systems** and provides a quick overview of learning consistency over time.
+### 🔍 Hover details
 
+ <p align="center"> <a href="https://zhangjingya.github.io/notion-heatmap/"> <img src="./assets/heatmap_detail.png" width="50%" /> </a> </p>
+
+Each cell in the heatmap is interactive.
+When hovering over a day, a tooltip will display:
+- Date
+- Number of new words added
+- Number of words reviewed
+- Number of quiz attempts
+
+This allows you to quickly inspect daily learning activity without cluttering the visual layout.
+
+ 
 ---
 
 ## ✨ What does this heatmap show?
